@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Command Center - CW</title>
+    <style>
+        :root {
+            --primary: #2D6A6A;
+            --primary-dark: #1d4a4a;
+            --accent: #D4A853;
+            --bg: #f5f5f5;
+            --card-bg: #ffffff;
+            --text: #333333;
+            --text-light: #666666;
+            --border: #e0e0e0;
+            --success: #4CAF50;
+            --warning: #ff9800;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        /* Login Screen */
+        .login-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .login-box {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+        }
+
+        .login-box h1 {
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+
+        .login-box p {
+            color: var(--text-light);
+            margin-bottom: 30px;
+        }
+
+        .login-box input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-size: 18px;
+            text-align: center;
+            letter-spacing: 8px;
+            margin-bottom: 20px;
+        }
+
+        .login-box input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .login-box button {
+            width: 100%;
+            padding: 15px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .login-box button:hover {
+            background: var(--primary-dark);
+        }
+
+        .first-login-hint {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        .error-msg {
+            color: #dc3545;
+            margin-top: 10px;
+            display: none;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* Header */
+        header {
+            background: var(--primary);
+            color: white;
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h1 {
+            font-size: 24px;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .lang-toggle {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .logout-btn {
+            background: var(--accent);
+            border: none;
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+        }
+
+        /* Main Content */
+        main {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 30px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 30px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            overflow: hidden;
+        }
+
+        .card-header {
+            background: var(--primary);
+            color: white;
+            padding: 15px 20px;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-body {
+            padding: 20px;
+        }
+
+        /* Quick Facts */
+        .quick-facts {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .fact {
+            padding: 15px;
+            background: var(--bg);
+            border-radius: 8px;
+        }
+
+        .fact-label {
+            font-size: 12px;
+            color: var(--text-light);
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+
+        .fact-value {
+            font-size: 16px;
+            font-weight: bold;
+            word-break: break-all;
+        }
+
+        /* Projects Table */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            background: var(--bg);
+            font-weight: 600;
+            font-size: 12px;
+            text-transform: uppercase;
+            color: var(--text-light);
+        }
+
+        .status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .status-active {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .status-idea {
+            background: #fff3e0;
+            color: #ef6c00;
+        }
+
+        .status-new {
+            background: #e3f2fd;
+            color: #1565c0;
+        }
+
+        /* Credentials */
+        .credential-item {
+            padding: 15px;
+            background: var(--bg);
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .credential-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .credential-label {
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: var(--primary);
+        }
+
+        .credential-value {
+            font-family: 'Courier New', monospace;
+            background: white;
+            padding: 10px;
+            border-radius: 4px;
+            border: 1px solid var(--border);
+            position: relative;
+        }
+
+        .copy-btn {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .blur {
+            filter: blur(5px);
+            user-select: none;
+        }
+
+        .reveal-btn {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 5px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 30px;
+            color: var(--text-light);
+            font-size: 14px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            .quick-facts {
+                grid-template-columns: 1fr;
+            }
+
+            header {
+                flex-direction: column;
+                gap: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Screen -->
+    <div class="login-screen" id="loginScreen">
+        <div class="login-box">
+            <h1>Command Center</h1>
+            <p data-de="Willkommen, Christian" data-en="Welcome, Christian">Willkommen, Christian</p>
+
+            <div class="first-login-hint" id="firstLoginHint">
+                <strong data-de="Erster Login?" data-en="First login?">Erster Login?</strong><br>
+                <span data-de="Standard-Passwort: 0000" data-en="Default password: 0000">Standard-Passwort: 0000</span><br>
+                <span data-de="Du wirst aufgefordert, ein neues Passwort zu setzen." data-en="You will be asked to set a new password.">Du wirst aufgefordert, ein neues Passwort zu setzen.</span>
+            </div>
+
+            <input type="password" id="passwordInput" placeholder="****" maxlength="20" autofocus>
+            <button onclick="login()" data-de="Einloggen" data-en="Login">Einloggen</button>
+            <p class="error-msg" id="errorMsg" data-de="Falsches Passwort" data-en="Wrong password">Falsches Passwort</p>
+        </div>
+    </div>
+
+    <!-- Set New Password Modal -->
+    <div class="login-screen hidden" id="setPasswordScreen">
+        <div class="login-box">
+            <h1 data-de="Neues Passwort setzen" data-en="Set New Password">Neues Passwort setzen</h1>
+            <p data-de="Waehle ein sicheres Passwort" data-en="Choose a secure password">Waehle ein sicheres Passwort</p>
+            <input type="password" id="newPassword1" placeholder="Neues Passwort">
+            <input type="password" id="newPassword2" placeholder="Passwort wiederholen" style="margin-top: -10px;">
+            <button onclick="setNewPassword()" data-de="Passwort speichern" data-en="Save Password">Passwort speichern</button>
+            <p class="error-msg" id="passwordError" data-de="Passwoerter stimmen nicht ueberein" data-en="Passwords don't match">Passwoerter stimmen nicht ueberein</p>
+        </div>
+    </div>
+
+    <!-- Main Dashboard -->
+    <div class="dashboard hidden" id="dashboard">
+        <header>
+            <h1>Command Center - CW</h1>
+            <div class="header-right">
+                <button class="lang-toggle" onclick="toggleLang()" id="langBtn">EN</button>
+                <button class="logout-btn" onclick="logout()" data-de="Logout" data-en="Logout">Logout</button>
+            </div>
+        </header>
+
+        <main>
+            <div class="grid">
+                <!-- Quick Facts -->
+                <div class="card">
+                    <div class="card-header">
+                        <span data-de="Quick Facts" data-en="Quick Facts">Quick Facts</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="quick-facts">
+                            <div class="fact">
+                                <div class="fact-label">Name</div>
+                                <div class="fact-value">Christian Workert</div>
+                            </div>
+                            <div class="fact">
+                                <div class="fact-label" data-de="Kuerzel" data-en="Code">Kuerzel</div>
+                                <div class="fact-value">CW</div>
+                            </div>
+                            <div class="fact">
+                                <div class="fact-label">Email</div>
+                                <div class="fact-value">cw@uaeandmore.com</div>
+                            </div>
+                            <div class="fact">
+                                <div class="fact-label">GitHub</div>
+                                <div class="fact-value">PrivacyManagementGroup</div>
+                            </div>
+                            <div class="fact">
+                                <div class="fact-label">Server IP</div>
+                                <div class="fact-value">65.109.167.139</div>
+                            </div>
+                            <div class="fact">
+                                <div class="fact-label" data-de="Letztes Update" data-en="Last Update">Letztes Update</div>
+                                <div class="fact-value">2026-02-03</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Server -->
+                <div class="card">
+                    <div class="card-header">
+                        <span data-de="Server-Zugang" data-en="Server Access">Server-Zugang</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="credential-item">
+                            <div class="credential-label">SSH Command</div>
+                            <div class="credential-value">
+                                ssh root@65.109.167.139
+                                <button class="copy-btn" onclick="copyText('ssh root@65.109.167.139')">Copy</button>
+                            </div>
+                        </div>
+                        <div class="credential-item">
+                            <div class="credential-label">Password</div>
+                            <div class="credential-value">
+                                <span class="blur" id="serverPw">NnVjg7749stiWPvVV3iVx3</span>
+                                <button class="reveal-btn" onclick="toggleBlur('serverPw', this)" data-de="Zeigen" data-en="Show">Zeigen</button>
+                            </div>
+                        </div>
+                        <div class="credential-item">
+                            <div class="credential-label" data-de="Web-Pfad" data-en="Web Path">Web-Pfad</div>
+                            <div class="credential-value">
+                                /var/www/html/
+                                <button class="copy-btn" onclick="copyText('/var/www/html/')">Copy</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Projekte -->
+                <div class="card" style="grid-column: span 2;">
+                    <div class="card-header">
+                        <span data-de="Projekte" data-en="Projects">Projekte</span>
+                    </div>
+                    <div class="card-body">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th data-de="Projekt" data-en="Project">Projekt</th>
+                                    <th>Status</th>
+                                    <th data-de="Prioritaet" data-en="Priority">Prioritaet</th>
+                                    <th data-de="Ordner" data-en="Folder">Ordner</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Website-Redesign</td>
+                                    <td><span class="status status-active" data-de="In Arbeit" data-en="In Progress">In Arbeit</span></td>
+                                    <td data-de="Hoch" data-en="High">Hoch</td>
+                                    <td><code>Website-Redesign - CW/</code></td>
+                                </tr>
+                                <tr>
+                                    <td>Kunden-Onboarding</td>
+                                    <td><span class="status status-active" data-de="In Arbeit" data-en="In Progress">In Arbeit</span></td>
+                                    <td data-de="Mittel" data-en="Medium">Mittel</td>
+                                    <td><code>Kunden-Onboarding - CW/</code></td>
+                                </tr>
+                                <tr>
+                                    <td>Internes-Tool</td>
+                                    <td><span class="status status-idea" data-de="Ideensammlung" data-en="Ideas">Ideensammlung</span></td>
+                                    <td data-de="Niedrig" data-en="Low">Niedrig</td>
+                                    <td><code>Internes-Tool - CW/</code></td>
+                                </tr>
+                                <tr>
+                                    <td>Mein-Erstes-Projekt</td>
+                                    <td><span class="status status-new" data-de="Neu" data-en="New">Neu</span></td>
+                                    <td>-</td>
+                                    <td><code>Mein-Erstes-Projekt - CW/</code></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- GitHub -->
+                <div class="card">
+                    <div class="card-header">
+                        <span>GitHub</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="credential-item">
+                            <div class="credential-label">Organisation</div>
+                            <div class="credential-value">
+                                PrivacyManagementGroup
+                                <button class="copy-btn" onclick="copyText('PrivacyManagementGroup')">Copy</button>
+                            </div>
+                        </div>
+                        <div class="credential-item">
+                            <div class="credential-label">Repository</div>
+                            <div class="credential-value">
+                                claude (privat)
+                            </div>
+                        </div>
+                        <div class="credential-item">
+                            <div class="credential-label">Personal Access Token</div>
+                            <div class="credential-value">
+                                <span class="blur" id="githubToken">[Siehe Password Manager]</span>
+                                <button class="reveal-btn" onclick="toggleBlur('githubToken', this)" data-de="Zeigen" data-en="Show">Zeigen</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Links -->
+                <div class="card">
+                    <div class="card-header">
+                        <span data-de="Schnellzugriff" data-en="Quick Links">Schnellzugriff</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="credential-item">
+                            <div class="credential-label">GitHub Repo</div>
+                            <div class="credential-value">
+                                <a href="https://github.com/PrivacyManagementGroup/claude" target="_blank">github.com/PrivacyManagementGroup/claude</a>
+                            </div>
+                        </div>
+                        <div class="credential-item">
+                            <div class="credential-label" data-de="Server Webseite" data-en="Server Website">Server Webseite</div>
+                            <div class="credential-value">
+                                <a href="http://65.109.167.139" target="_blank">http://65.109.167.139</a>
+                            </div>
+                        </div>
+                        <div class="credential-item">
+                            <div class="credential-label">Command Center</div>
+                            <div class="credential-value">
+                                <a href="http://65.109.167.139:8080" target="_blank">http://65.109.167.139:8080</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer>
+            <p>Command Center - Christian Workert (CW) | StaffedSpaces Team-Onboarding | 2026</p>
+        </footer>
+    </div>
+
+    <script>
+        // Password hashing (simple SHA-256)
+        async function hashPassword(password) {
+            const encoder = new TextEncoder();
+            const data = encoder.encode(password);
+            const hash = await crypto.subtle.digest('SHA-256', data);
+            return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+
+        // Default password hash (0000)
+        const DEFAULT_HASH = '9af15b336e6a9619928537df30b2e6a2376569fcf9d7e773eccede65606529a0';
+
+        // Check if password has been changed
+        function isFirstLogin() {
+            return !localStorage.getItem('cc_password_hash');
+        }
+
+        // Get stored password hash
+        function getStoredHash() {
+            return localStorage.getItem('cc_password_hash') || DEFAULT_HASH;
+        }
+
+        // Login function
+        async function login() {
+            const input = document.getElementById('passwordInput').value;
+            const inputHash = await hashPassword(input);
+
+            if (inputHash === getStoredHash()) {
+                if (isFirstLogin() && input === '0000') {
+                    // First login with default password - require change
+                    document.getElementById('loginScreen').classList.add('hidden');
+                    document.getElementById('setPasswordScreen').classList.remove('hidden');
+                } else {
+                    // Normal login
+                    document.getElementById('loginScreen').classList.add('hidden');
+                    document.getElementById('dashboard').classList.remove('hidden');
+                    document.getElementById('firstLoginHint').classList.add('hidden');
+                }
+            } else {
+                document.getElementById('errorMsg').style.display = 'block';
+                document.getElementById('passwordInput').value = '';
+            }
+        }
+
+        // Set new password
+        async function setNewPassword() {
+            const pw1 = document.getElementById('newPassword1').value;
+            const pw2 = document.getElementById('newPassword2').value;
+
+            if (pw1 !== pw2 || pw1.length < 4) {
+                document.getElementById('passwordError').style.display = 'block';
+                return;
+            }
+
+            const hash = await hashPassword(pw1);
+            localStorage.setItem('cc_password_hash', hash);
+
+            document.getElementById('setPasswordScreen').classList.add('hidden');
+            document.getElementById('dashboard').classList.remove('hidden');
+        }
+
+        // Logout
+        function logout() {
+            document.getElementById('dashboard').classList.add('hidden');
+            document.getElementById('loginScreen').classList.remove('hidden');
+            document.getElementById('passwordInput').value = '';
+            document.getElementById('errorMsg').style.display = 'none';
+        }
+
+        // Copy to clipboard
+        function copyText(text) {
+            navigator.clipboard.writeText(text);
+        }
+
+        // Toggle blur on sensitive data
+        function toggleBlur(elementId, btn) {
+            const el = document.getElementById(elementId);
+            el.classList.toggle('blur');
+            const lang = localStorage.getItem('cc_lang') || 'de';
+            if (el.classList.contains('blur')) {
+                btn.textContent = lang === 'de' ? 'Zeigen' : 'Show';
+            } else {
+                btn.textContent = lang === 'de' ? 'Verstecken' : 'Hide';
+            }
+        }
+
+        // Language toggle
+        let currentLang = localStorage.getItem('cc_lang') || 'de';
+
+        function toggleLang() {
+            currentLang = currentLang === 'de' ? 'en' : 'de';
+            localStorage.setItem('cc_lang', currentLang);
+            applyLang();
+        }
+
+        function applyLang() {
+            document.getElementById('langBtn').textContent = currentLang === 'de' ? 'EN' : 'DE';
+            document.querySelectorAll('[data-de]').forEach(el => {
+                el.textContent = currentLang === 'de' ? el.dataset.de : el.dataset.en;
+            });
+        }
+
+        // Enter key for login
+        document.getElementById('passwordInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') login();
+        });
+
+        // Init
+        if (!isFirstLogin()) {
+            document.getElementById('firstLoginHint').classList.add('hidden');
+        }
+        applyLang();
+    </script>
+</body>
+</html>
