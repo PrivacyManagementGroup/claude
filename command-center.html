@@ -556,33 +556,34 @@
     </div>
 
     <script>
-        // Password hashing (simple SHA-256)
-        async function hashPassword(password) {
-            const encoder = new TextEncoder();
-            const data = encoder.encode(password);
-            const hash = await crypto.subtle.digest('SHA-256', data);
-            return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
-        }
+        // Simple password storage (Base64 encoded for basic obfuscation)
+        // Note: For real security, use HTTPS + proper hashing
 
-        // Default password hash (0000)
-        const DEFAULT_HASH = '9af15b336e6a9619928537df30b2e6a2376569fcf9d7e773eccede65606529a0';
+        const DEFAULT_PASSWORD = '0000';
 
         // Check if password has been changed
         function isFirstLogin() {
-            return !localStorage.getItem('cc_password_hash');
+            return !localStorage.getItem('cc_password');
         }
 
-        // Get stored password hash
-        function getStoredHash() {
-            return localStorage.getItem('cc_password_hash') || DEFAULT_HASH;
+        // Get stored password
+        function getStoredPassword() {
+            const stored = localStorage.getItem('cc_password');
+            if (stored) {
+                try {
+                    return atob(stored);
+                } catch(e) {
+                    return DEFAULT_PASSWORD;
+                }
+            }
+            return DEFAULT_PASSWORD;
         }
 
         // Login function
-        async function login() {
+        function login() {
             const input = document.getElementById('passwordInput').value;
-            const inputHash = await hashPassword(input);
 
-            if (inputHash === getStoredHash()) {
+            if (input === getStoredPassword()) {
                 if (isFirstLogin() && input === '0000') {
                     // First login with default password - require change
                     document.getElementById('loginScreen').classList.add('hidden');
@@ -600,7 +601,7 @@
         }
 
         // Set new password
-        async function setNewPassword() {
+        function setNewPassword() {
             const pw1 = document.getElementById('newPassword1').value;
             const pw2 = document.getElementById('newPassword2').value;
 
@@ -609,8 +610,7 @@
                 return;
             }
 
-            const hash = await hashPassword(pw1);
-            localStorage.setItem('cc_password_hash', hash);
+            localStorage.setItem('cc_password', btoa(pw1));
 
             document.getElementById('setPasswordScreen').classList.add('hidden');
             document.getElementById('dashboard').classList.remove('hidden');
